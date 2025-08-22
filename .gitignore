@@ -28,4 +28,4 @@ package-lock.json
 package.json
 
 # directorios
-/public
+public/
