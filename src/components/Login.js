@@ -6,8 +6,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faLock, faSpinner, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 // Logos Institucionales
-import logoEco from '/images/logo_eco.png';
-import logoITSUP from '/images/logo_itsup.png';
+const logoEco = process.env.PUBLIC_URL + '/images/logo_eco.png';
+const logoITSUP = process.env.PUBLIC_URL + '/images/logo_itsup.png';
 
 // Hoja de estilo para login
 import '/css/login.css';
