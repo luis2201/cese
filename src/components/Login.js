@@ -1,77 +1,136 @@
 import React, { useState } from 'react';
-import { login } from '../services/apiService';
 import { useNavigate } from 'react-router-dom';
+import { login } from '../services/apiService';
+import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faLock, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faLock, faSpinner, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+
+// Logos Institucionales
+import logoEco from '../public/images/logo_eco.png';
+import logoITSUP from '../public/images/logo_itsup.png';
+
+// Hoja de estilo para login
+import '../public/css/login.css';
 
 const Login = () => {
-    const [credentials, setCredentials] = useState({ Usuario: '', Contrasena: '' });
-    const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+  const [credentials, setCredentials] = useState({ Usuario: '', Contrasena: '' });
+  const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+  const navigate = useNavigate();
 
-    const handleChange = (e) => {
-        setCredentials({ ...credentials, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    setCredentials({ ...credentials, [e.target.name]: e.target.value });
+  };
+
+  const validate = () => {
+    if (!credentials.Usuario.trim() || !credentials.Contrasena.trim()) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Por favor, complete todos los campos.',
+        confirmButtonText: 'Entendido'
+      });
+      return false;
     }
+    return true;
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
 
-        if(!credentials.Usuario.trim() || !credentials.Contrasena.trim()) {
-            setError('Por favor, complete todos los campos');
-            setLoading(false);
-            return;
-        }
+    setLoading(true);
 
-        try {
-            await login(credentials);
-            setTimeout(() => {
-                navigate('/dashboard');
-            }, 1000);
-        } catch (error) {
-            setLoading(false);
-            setError('Credenciales incorrectas o problema en el servidor');
-        } finally {
-            setLoading(false);
-        }
-    };
+    try {
+      await login(credentials);
+      Swal.fire({
+        icon: 'success',
+        title: '¡Bienvenido!',
+        text: 'Autenticación exitosa.',
+        timer: 1200,
+        showConfirmButton: false
+      });
+      // leve delay para permitir ver el alerta
+      setTimeout(() => navigate('/dashboard'), 800);
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: 'No fue posible iniciar sesión',
+        text: 'Credenciales incorrectas o problema en el servidor.',
+        confirmButtonText: 'Reintentar'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div className="login-container">
-            <h2>Iniciar Sesión</h2>
-            <form onSubmit={handleSubmit}>
-                <div className="input-group">
-                    <FontAwesomeIcon icon={faUser} />
-                    <input
-                        type="text"
-                        name="Usuario"
-                        placeholder="Usuario"
-                        value={credentials.Usuario}
-                        onChange={handleChange}
-                        disabled={loading}
-                    />
-                </div>
-                <div className="input-group">
-                    <FontAwesomeIcon icon={faLock} />
-                    <input
-                        type="password"
-                        name="Contrasena"
-                        placeholder="Contraseña"
-                        value={credentials.Contrasena}
-                        onChange={handleChange}
-                        disabled={loading}
-                    />
-                </div>
-                {error && <p className="error-message">{error}</p>}
-                <button type="submit" disabled={loading}>
-                    {loading ? <FontAwesomeIcon icon={faSpinner} spin /> : 'Iniciar Sesión'}
-                </button>
-            </form>
+  return (
+    <div className="login-wrap">
+      {/* Círculos decorativos */}
+      <span className="decor decor-1" />
+      <span className="decor decor-2" />
+
+      <div className="card-login" role="main" aria-labelledby="titulo-login">
+        <div className="brand-strip">
+          <img src={logoEco} alt="Proyecto ECO ITSUP" className="brand-logo" />
+          <div className="divider" />
+          <img src={logoITSUP} alt="ITSUP Portoviejo" className="brand-logo" />
         </div>
-    );
 
+        <h1 id="titulo-login" className="title">Iniciar Sesión</h1>
+        <p className="subtitle">Accede con tu usuario institucional</p>
+
+        <form onSubmit={handleSubmit} className="form">
+          <label className="input-group" aria-label="Usuario">
+            <span className="icon">
+              <FontAwesomeIcon icon={faUser} />
+            </span>
+            <input
+              type="text"
+              name="Usuario"
+              placeholder="Usuario"
+              value={credentials.Usuario}
+              onChange={handleChange}
+              disabled={loading}
+              autoComplete="username"
+            />
+          </label>
+
+          <label className="input-group" aria-label="Contraseña">
+            <span className="icon">
+              <FontAwesomeIcon icon={faLock} />
+            </span>
+            <input
+              type={showPass ? 'text' : 'password'}
+              name="Contrasena"
+              placeholder="Contraseña"
+              value={credentials.Contrasena}
+              onChange={handleChange}
+              disabled={loading}
+              autoComplete="current-password"
+            />
+            <button
+              type="button"
+              className="toggle-pass"
+              onClick={() => setShowPass(!showPass)}
+              aria-label={showPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              disabled={loading}
+            >
+              <FontAwesomeIcon icon={showPass ? faEyeSlash : faEye} />
+            </button>
+          </label>
+
+          <button type="submit" className="btn-submit" disabled={loading}>
+            {loading ? <FontAwesomeIcon icon={faSpinner} spin /> : 'Iniciar Sesión'}
+          </button>
+        </form>
+
+        <footer className="footnote">
+          <small>© ITSUP Portoviejo — Proyecto ECO</small>
+        </footer>
+      </div>
+    </div>
+  );
 };
 
 export default Login;
