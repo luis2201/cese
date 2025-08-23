@@ -6,11 +6,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faLock, faSpinner, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 // Logos Institucionales
-import logoEco from '../public/images/logo_eco.png';
-import logoITSUP from '../public/images/logo_itsup.png';
+import logoEco from '../../public/images/logo_eco.png';
+import logoITSUP from '../../public/images/logo_itsup.png';
 
 // Hoja de estilo para login
-import '../public/css/login.css';
+import './../public/css/login.css';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({ Usuario: '', Contrasena: '' });
