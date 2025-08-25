@@ -3,6 +3,7 @@ import { useNavigate, NavLink } from 'react-router-dom';
 import { getUserData, logout } from '../services/apiService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown, faRightFromBracket, faGauge } from '@fortawesome/free-solid-svg-icons';
+import Menu from './Menu';
 
 const Layout = ({ children }) => {
     const navigate = useNavigate();
@@ -21,7 +22,6 @@ const Layout = ({ children }) => {
                         <FontAwesomeIcon icon={faGauge} /> <span>CESE</span>
                     </NavLink>
                 </div>
-
                 <div className="userbox">
                     <span className="welcome">Bienvenido, <strong>{nombres}</strong></span>
                     <div className="dropdown">
@@ -38,9 +38,14 @@ const Layout = ({ children }) => {
                 </div>
             </header>
 
-            <main className="content">
-                {children}
-            </main>
+            <div className="app-body">
+                <aside className="sidebar">
+                    <Menu />
+                </aside>
+                <main className="content">
+                    {children}
+                </main>
+            </div>
         </div>
     );
 };
