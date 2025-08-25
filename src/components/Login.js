@@ -25,7 +25,7 @@ const Login = () => {
   };
 
   const validate = () => {
-    if (!credentials.Usuario.trim() || !credentials.Contrasena.trim()) {
+    if (!credentials.usuario.trim() || !credentials.contrasena.trim()) {
       Swal.fire({
         icon: 'warning',
         title: 'Campos incompletos',
