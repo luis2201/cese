@@ -1,11 +1,11 @@
+// src/components/Login.js
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { login } from '../services/apiService';
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faLock, faSpinner, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
-// Logos Institucionales
 const logoEco = process.env.PUBLIC_URL + '/images/logo_eco.png';
 const logoITSUP = process.env.PUBLIC_URL + '/images/logo_itsup.png';
 
@@ -13,10 +13,15 @@ const Login = () => {
   const [credentials, setCredentials] = useState({ Usuario: '', Contrasena: '' });
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
+
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.from?.pathname || '/dashboard';
 
   const handleChange = (e) => {
-    setCredentials({ ...credentials, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    // Trim suave: evita espacios accidentales a la izquierda
+    setCredentials((prev) => ({ ...prev, [name]: value.replace(/^\s+/, '') }));
   };
 
   const validate = () => {
@@ -24,7 +29,7 @@ const Login = () => {
       Swal.fire({
         icon: 'warning',
         title: 'Campos incompletos',
-        text: 'Por favor, complete todos los campos.',
+        text: 'Por favor, complete usuario y contraseña.',
         confirmButtonText: 'Entendido'
       });
       return false;
@@ -34,26 +39,34 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
     if (!validate()) return;
 
     setLoading(true);
-
     try {
-      await login(credentials);
+      const resp = await login(credentials);
+
       Swal.fire({
         icon: 'success',
         title: '¡Bienvenido!',
         text: 'Autenticación exitosa.',
-        timer: 1200,
+        timer: 1000,
         showConfirmButton: false
       });
-      // leve delay para permitir ver el alerta
-      setTimeout(() => navigate('/dashboard'), 800);
+
+      // Pequeño delay para que se vea el toast
+      setTimeout(() => navigate(redirectTo, { replace: true }), 700);
+      return resp;
     } catch (err) {
+      const msg =
+        err?.details?.message ||
+        err?.details?.error ||
+        err?.message ||
+        'Credenciales incorrectas o problema en el servidor.';
       Swal.fire({
         icon: 'error',
         title: 'No fue posible iniciar sesión',
-        text: 'Credenciales incorrectas o problema en el servidor.',
+        text: msg,
         confirmButtonText: 'Reintentar'
       });
     } finally {
@@ -63,7 +76,6 @@ const Login = () => {
 
   return (
     <div className="login-wrap">
-      {/* Círculos decorativos */}
       <span className="decor decor-1" />
       <span className="decor decor-2" />
 
@@ -77,7 +89,7 @@ const Login = () => {
         <h1 id="titulo-login" className="title">Iniciar Sesión</h1>
         <p className="subtitle">Accede con tu usuario institucional</p>
 
-        <form onSubmit={handleSubmit} className="form">
+        <form onSubmit={handleSubmit} className="form" noValidate>
           <label className="input-group" aria-label="Usuario">
             <span className="icon">
               <FontAwesomeIcon icon={faUser} />
@@ -90,6 +102,7 @@ const Login = () => {
               onChange={handleChange}
               disabled={loading}
               autoComplete="username"
+              autoFocus
             />
           </label>
 
@@ -109,9 +122,10 @@ const Login = () => {
             <button
               type="button"
               className="toggle-pass"
-              onClick={() => setShowPass(!showPass)}
+              onClick={() => setShowPass((v) => !v)}
               aria-label={showPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               disabled={loading}
+              tabIndex={-1}
             >
               <FontAwesomeIcon icon={showPass ? faEyeSlash : faEye} />
             </button>
@@ -123,7 +137,7 @@ const Login = () => {
         </form>
 
         <footer className="footnote">
-          <small>© ITSUP Portoviejo — Proyecto ECO</small>
+          <small>© ITSUP Portoviejo — CESE</small>
         </footer>
       </div>
     </div>

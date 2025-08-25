@@ -1,105 +1,132 @@
+// src/services/apiService.js
 import config from '../config';
 
-const API_URL = config.API_URL;
+const API_URL = String(config.API_URL || '').replace(/\/+$/, ''); // sin slash final
 
-// Almacenamiento del token
-const getToken = () => localStorage.getItem('token');
+// ====== Storage helpers ======
+const TOKEN_KEY = 'token';
+const USER_KEY = 'userData';
 
-// Realizar peticiones a la API
-const request = async (endpoint, method = 'GET', data = null, auth = false, headers = {}) => {
-    try{
-        const options = { 
-            method,
-            headers: {
-                'Content-Type': 'application/json',
-                ...headers
-            }
-        };
-
-        if (auth) {
-            const token = getToken();
-            if (token) {
-                options.headers['Authorization'] = `Bearer ${token}`;
-            }
-        }
-
-        if (data) {
-            options.body = JSON.stringify(data);
-        }
-
-        const response = await fetch(`${API_URL}/${endpoint}`, options);
-
-        if (!response.ok) {
-            throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-        return await response.json();
-    } 
-    catch (error) {        
-        throw error;
-    }
+const getToken = () => localStorage.getItem(TOKEN_KEY);
+const setToken = (t) => localStorage.setItem(TOKEN_KEY, t);
+const clearSession = () => {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
 };
 
-// Funciones para interactuar con la API
-export const getData = async (endpoint, auth = false) => {
-    const options = {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    };
-    
-    if (auth) {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            console.error('No token found for authenticated request');
-            return null;
-        }
-        options.headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    try
-    {
-        const response = await fetch(`${API_URL}/${endpoint}`, options);
-        
-        if (!response.ok) {
-            throw new Error(`Error ${response.status}: ${response.statusText}`);
-        }
-
-        return await response.json();
-    }
-    catch (error) {
-        console.error('Fetch error:', error);
-        return null;
-    }
-};
-
-export const postData = (endpoint, data, auth = false) => request(endpoint, 'POST', data, auth);
-export const putData = (endpoint, data, auth = false) => request(endpoint, 'PUT', data, auth);
-export const deleteData = (endpoint, auth = false) => request(endpoint, 'DELETE', null, auth);
-
-export const login = async (credentials) => {
+// ====== JWT helpers ======
+const isTokenValid = (token) => {
+    if (!token) return false;
     try {
-        const response = await postData('auth/login', credentials);
-        if (response.token && response.nombres && response.tipousuario) {
-            localStorage.setItem('token', response.token);
-            localStorage.setItem('userData', JSON.stringify({ nombres: response.nombres, tipousuario: response.tipousuario }));  
-        } 
-
-        return response;
-    } catch (error) {
-        console.error('Login error:', error);
-        throw error;
+        const payload = JSON.parse(
+            atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))
+        );
+        if (!payload?.exp) return false;
+        return payload.exp * 1000 > Date.now();
+    } catch {
+        return false;
     }
 };
 
-// Datos del usuario autenticado
-export const getUserData = () => JSON.parse(localStorage.getItem('userData')) || { Nombres: 'Usuario', TipoUsuario: 'Invitado' };
+// ====== Core request ======
+const request = async (endpoint, { method = 'GET', data, auth = false, headers = {}, signal } = {}) => {
+    const url = `${API_URL}/${String(endpoint).replace(/^\/+/, '')}`;
 
-// Cerrar sesión
-export const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userData');
+    const opts = {
+        method,
+        headers: {
+            'Content-Type': 'application/json',
+            ...headers,
+        },
+        signal,
+    };
+
+    if (auth) {
+        const token = getToken();
+        if (token) {
+            opts.headers['Authorization'] = `Bearer ${token}`;
+        }
+    }
+
+    if (data !== undefined && data !== null) {
+        opts.body = JSON.stringify(data);
+    }
+
+    const res = await fetch(url, opts);
+
+    // intenta parsear JSON siempre que sea posible
+    let body;
+    try {
+        body = await res.json();
+    } catch {
+        body = null;
+    }
+
+    if (!res.ok) {
+        // 401 -> limpiar sesión
+        if (res.status === 401) clearSession();
+
+        const message =
+            (body && (body.message || body.error || body.msg)) ||
+            `Error ${res.status}: ${res.statusText}`;
+
+        const err = new Error(message);
+        err.status = res.status;
+        err.details = body;
+        throw err;
+    }
+
+    return body;
 };
 
-// Verificar si el usuario está autenticado
-export const isAuthenticated = () => !!getToken();
+// ====== Shorthands ======
+export const getData = (endpoint, auth = false, headers = {}) =>
+    request(endpoint, { method: 'GET', auth, headers });
+
+export const postData = (endpoint, data, auth = false, headers = {}) =>
+    request(endpoint, { method: 'POST', data, auth, headers });
+
+export const putData = (endpoint, data, auth = false, headers = {}) =>
+    request(endpoint, { method: 'PUT', data, auth, headers });
+
+export const deleteData = (endpoint, auth = false, headers = {}) =>
+    request(endpoint, { method: 'DELETE', auth, headers });
+
+// ====== Auth ======
+export const login = async (credentials) => {
+    // No logeamos credenciales en producción
+    const resp = await postData('auth/login', credentials, false);
+
+    // Soporta diferentes llaves según API
+    const token = resp.token || resp.access_token || resp.jwt;
+    if (token) setToken(token);
+
+    // Normaliza nombres y rol/tipo
+    const nombres = resp.nombres || resp.Nombres || resp.name || 'Usuario';
+    const tipousuario =
+        resp.tipousuario ||
+        resp.TipoUsuario ||
+        resp.rol ||
+        resp.Rol ||
+        'INVITADO';
+
+    const userData = { nombres, tipousuario };
+    localStorage.setItem(USER_KEY, JSON.stringify(userData));
+
+    return resp;
+};
+
+export const logout = () => clearSession();
+
+export const getUserData = () => {
+    try {
+        return JSON.parse(localStorage.getItem(USER_KEY)) || { nombres: 'Usuario', tipousuario: 'INVITADO' };
+    } catch {
+        return { nombres: 'Usuario', tipousuario: 'INVITADO' };
+    }
+};
+
+export const isAuthenticated = () => {
+    const t = getToken();
+    return isTokenValid(t);
+};
