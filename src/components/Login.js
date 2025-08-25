@@ -96,9 +96,9 @@ const Login = () => {
             </span>
             <input
               type="text"
-              name="Usuario"
+              name="usuario"
               placeholder="Usuario"
-              value={credentials.Usuario}
+              value={credentials.usuario}
               onChange={handleChange}
               disabled={loading}
               autoComplete="username"
@@ -112,9 +112,9 @@ const Login = () => {
             </span>
             <input
               type={showPass ? 'text' : 'password'}
-              name="Contrasena"
+              name="contrasena"
               placeholder="Contraseña"
-              value={credentials.Contrasena}
+              value={credentials.contrasena}
               onChange={handleChange}
               disabled={loading}
               autoComplete="current-password"
