@@ -9,9 +9,6 @@ import { faUser, faLock, faSpinner, faEye, faEyeSlash } from '@fortawesome/free-
 const logoEco = process.env.PUBLIC_URL + '/images/logo_eco.png';
 const logoITSUP = process.env.PUBLIC_URL + '/images/logo_itsup.png';
 
-// Hoja de estilo para login
-import '/css/login.css';
-
 const Login = () => {
   const [credentials, setCredentials] = useState({ Usuario: '', Contrasena: '' });
   const [loading, setLoading] = useState(false);
