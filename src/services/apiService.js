@@ -94,6 +94,7 @@ export const deleteData = (endpoint, auth = false, headers = {}) =>
 
 // ====== Auth ======
 export const login = async (credentials) => {
+    console.log('Credenciales: ', credentials);
     // No logeamos credenciales en producción
     const resp = await postData('auth/login', credentials, false);
 
@@ -102,7 +103,7 @@ export const login = async (credentials) => {
     if (token) setToken(token);
 
     // Normaliza nombres y rol/tipo
-    const nombres = resp.nombres || resp.Nombres || resp.name || 'Usuario';
+    const nombres = resp.nombres || resp.Nombres || resp.name || 'usuario';
     const tipousuario =
         resp.tipousuario ||
         resp.TipoUsuario ||

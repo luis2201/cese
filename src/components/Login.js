@@ -94,31 +94,14 @@ const Login = () => {
             <span className="icon">
               <FontAwesomeIcon icon={faUser} />
             </span>
-            <input
-              type="text"
-              name="usuario"
-              placeholder="Usuario"
-              value={credentials.usuario}
-              onChange={handleChange}
-              disabled={loading}
-              autoComplete="username"
-              autoFocus
-            />
+            <input type="text" name="usuario" placeholder="Usuario" value={credentials.usuario} onChange={handleChange} disabled={loading} autoComplete="username"autoFocus />
           </label>
 
           <label className="input-group" aria-label="Contraseña">
             <span className="icon">
               <FontAwesomeIcon icon={faLock} />
             </span>
-            <input
-              type={showPass ? 'text' : 'password'}
-              name="contrasena"
-              placeholder="Contraseña"
-              value={credentials.contrasena}
-              onChange={handleChange}
-              disabled={loading}
-              autoComplete="current-password"
-            />
+            <input type={showPass ? 'text' : 'password'} name="contrasena" placeholder="Contraseña" value={credentials.contrasena} onChange={handleChange} disabled={loading} autoComplete="current-password" />
             <button
               type="button"
               className="toggle-pass"
