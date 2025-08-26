@@ -79,7 +79,7 @@ export const deleteData = (endpoint, auth = false) => request(endpoint, 'DELETE'
 export const login = async (credentials) => {
     try {
         const response = await postData('auth/login', credentials);
-        console.log(response);
+
         if (response.token && response.nombres && response.tipousuario) {
             localStorage.setItem('token', response.token);
             localStorage.setItem(

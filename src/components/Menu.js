@@ -77,6 +77,7 @@ export default function Menu() {
             try {
                 // La API debe devolver los menús para el rol del usuario del token
                 const data = await getData('permissions/menus', true);
+                console.log(data);  
                 if (mounted && Array.isArray(data)) {
                     setItems(data);
                 }
