@@ -102,6 +102,7 @@ export const login = async (credentials) => {
 
 // Datos del usuario autenticado
 export const getUserData = () => {
+    alert(tipousuario);
     try {
         return JSON.parse(localStorage.getItem('userData')) || { nombres: 'Usuario', tipousuario: 'INVITADO' };
     } catch {
