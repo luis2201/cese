@@ -34,8 +34,9 @@ function buildTree(items) {
 }
 
 const MenuItem = ({ node, onClick, activePath }) => {
-    const isDisabled = !node.Ruta || String(node.Ruta).trim() === '' || node.Ruta === 'NULL';
-    const isActive = !isDisabled && activePath === node.Ruta;
+    const isDisabled = node.Ruta == null || String(node.Ruta).trim() === '';
+    const isActive = !isDisabled && (activePath === node.Ruta || activePath.startsWith(node.Ruta + '/'));
+
 
     return (
         <li className={`menu-item ${isActive ? 'active' : ''} ${isDisabled ? 'disabled' : ''}`}>
@@ -75,21 +76,20 @@ export default function Menu() {
         let mounted = true;
         (async () => {
             try {
-                // La API debe devolver los menús para el rol del usuario del token
                 const data = await getData('permissions/menus', true);
-                console.log(data);  
-                if (mounted && Array.isArray(data)) {
-                    setItems(data);
-                }
+
+                // 👇 Acepta { menus: [...] } o directamente [...]
+                const list = Array.isArray(data) ? data : Array.isArray(data?.menus) ? data.menus : [];
+                if (mounted) setItems(list);
             } catch (e) {
-                // Si falla, dejamos un menú vacío
-                setItems([]);
+                if (mounted) setItems([]);
             } finally {
-                setLoading(false);
+                if (mounted) setLoading(false);
             }
         })();
         return () => { mounted = false; };
     }, []);
+
 
     const tree = useMemo(() => buildTree(items), [items]);
 
