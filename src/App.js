@@ -3,6 +3,7 @@ import PrivateRoute from './components/PrivateRoute';
 import PublicRoute from './components/PublicRoute';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
+import Inscripcion from './components/Inscripcion';
 
 function App() {
   return (
@@ -12,24 +13,11 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
 
         {/* Rutas públicas (redirige si ya hay sesión) */}
-        <Route 
-          path="/login"
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          }
-        />
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
 
         {/* Rutas privadas */}
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          }
-        />
+        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/inscripcion" element={<PrivateRoute><Inscripcion /></PrivateRoute>} />
 
         {/* 404 -> login */}
         <Route path="*" element={<Navigate to="/login" replace />} />
