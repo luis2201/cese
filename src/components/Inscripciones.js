@@ -57,58 +57,88 @@ const Inscripciones = () => {
 
   return (
     <Layout>
-      <div className="d-flex align-items-center justify-content-between" style={{marginBottom:12}}>
-        <h2 className="h1" style={{margin:0}}>Inscripciones</h2>
-        <button className="btn-submit" onClick={() => navigate('/inscripciones/agregar')}>Agregar</button>
+      {/* Encabezado */}
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="text-2xl font-extrabold text-eco-700">Inscripciones</h2>
+        <button
+          className="px-4 py-2 rounded-lg font-semibold text-white bg-gradient-to-r from-eco-600 to-itsup-600 shadow hover:shadow-lg transition"
+          onClick={() => navigate('/inscripciones/agregar')}
+        >
+          Agregar
+        </button>
       </div>
 
-      <div className="card" style={{marginBottom:12}}>
+      {/* Filtro */}
+      <div className="bg-white border-2 border-itsup-600/10 rounded-2xl p-4 shadow-soft mb-6">
         <input
-          className="form-control"
+          className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-itsup-600/40 focus:border-itsup-600"
           placeholder="Buscar por ID, periodo, carrera o docente…"
           value={filtro}
           onChange={(e) => setFiltro(e.target.value)}
         />
       </div>
 
-      <div className="card">
+      {/* Tabla */}
+      <div className="bg-white border-2 border-itsup-600/10 rounded-2xl p-4 shadow-soft">
         {loading ? (
-          <p>Cargando…</p>
+          <p className="text-gray-500">Cargando…</p>
         ) : (
-          <div className="table-responsive">
-            <table className="table">
-              <thead>
+          <div className="overflow-x-auto">
+            <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden text-sm">
+              <thead className="bg-itsup-600 text-white">
                 <tr>
-                  <th>ID</th>
-                  <th>Periodo</th>
-                  <th>Carrera</th>
-                  <th>Docente</th>
-                  <th>Horas requeridas</th>
-                  <th>Estado</th>
-                  <th style={{width:160}}>Acciones</th>
+                  <th className="px-4 py-2 text-left">ID</th>
+                  <th className="px-4 py-2 text-left">Periodo</th>
+                  <th className="px-4 py-2 text-left">Carrera</th>
+                  <th className="px-4 py-2 text-left">Docente</th>
+                  <th className="px-4 py-2 text-left">Horas requeridas</th>
+                  <th className="px-4 py-2 text-left">Estado</th>
+                  <th className="px-4 py-2 text-center">Acciones</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-200 bg-white">
                 {rows.filter(filtrar).map((r) => (
-                  <tr key={r.idconfiguracion ?? r.idinscripcion}>
-                    <td>{r.idconfiguracion ?? r.idinscripcion}</td>
-                    <td>{r.periodo ?? r.idperiodo}</td>
-                    <td>{r.carrera ?? r.idcarrera}</td>
-                    <td>{r.docente ?? r.iddocente}</td>
-                    <td>{r.horas_requeridas}</td>
-                    <td>{Number(r.estado) === 1 ? 'Activo' : 'Inactivo'}</td>
-                    <td>
-                      <button className="dropdown-item" onClick={() => navigate(`/inscripciones/editar/${r.idconfiguracion ?? r.idinscripcion}`)}>
-                        Editar
-                      </button>
-                      <button className="dropdown-item danger" onClick={() => onEliminar(r.idconfiguracion ?? r.idinscripcion)}>
-                        Eliminar
-                      </button>
+                  <tr key={r.idconfiguracion ?? r.idinscripcion} className="hover:bg-gray-50">
+                    <td className="px-4 py-2">{r.idconfiguracion ?? r.idinscripcion}</td>
+                    <td className="px-4 py-2">{r.periodo ?? r.idperiodo}</td>
+                    <td className="px-4 py-2">{r.carrera ?? r.idcarrera}</td>
+                    <td className="px-4 py-2">{r.docente ?? r.iddocente}</td>
+                    <td className="px-4 py-2">{r.horas_requeridas}</td>
+                    <td className="px-4 py-2">
+                      {Number(r.estado) === 1 ? (
+                        <span className="inline-flex items-center rounded-full bg-eco-600/10 px-2 py-0.5 text-xs font-semibold text-eco-600">
+                          Activo
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-full bg-red-600/10 px-2 py-0.5 text-xs font-semibold text-red-600">
+                          Inactivo
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2 text-center">
+                      <div className="flex justify-center gap-2">
+                        <button
+                          className="px-3 py-1 rounded-md bg-yellow-400 text-white text-xs font-semibold hover:bg-yellow-500 transition"
+                          onClick={() => navigate(`/inscripciones/editar/${r.idconfiguracion ?? r.idinscripcion}`)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="px-3 py-1 rounded-md bg-red-600 text-white text-xs font-semibold hover:bg-red-700 transition"
+                          onClick={() => onEliminar(r.idconfiguracion ?? r.idinscripcion)}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
                 {rows.length === 0 && (
-                  <tr><td colSpan="7">Sin registros</td></tr>
+                  <tr>
+                    <td colSpan="7" className="px-4 py-3 text-center text-gray-500">
+                      Sin registros
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
