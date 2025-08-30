@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import Layout from './Layout';
 
 const Inscripciones = () => {
+  // Siempre inicializa en [] para evitar accesos antes de tiempo
   const [rows, setRows] = useState([]);
   const [filtro, setFiltro] = useState('');
   const [loading, setLoading] = useState(true);
@@ -14,6 +15,7 @@ const Inscripciones = () => {
     setLoading(true);
     try {
       const data = await getData('inscripciones', true);
+      // Garantiza que rows siempre sea un array
       setRows(Array.isArray(data) ? data : []);
     } catch {
       setRows([]);
@@ -27,13 +29,14 @@ const Inscripciones = () => {
   }, []);
 
   const filtrar = (r) => {
-    if (!filtro.trim()) return true;
-    const s = filtro.toLowerCase();
+    const s = (filtro || '').toLowerCase().trim();
+    if (!s) return true;
+    const toStr = (v) => String(v ?? '').toLowerCase();
     return (
-      String(r.idconfiguracion ?? r.idinscripcion ?? '').toLowerCase().includes(s) ||
-      String(r.periodo ?? r.idperiodo ?? '').toLowerCase().includes(s) ||
-      String(r.carrera ?? r.idcarrera ?? '').toLowerCase().includes(s) ||
-      String(r.docente ?? r.iddocente ?? '').toLowerCase().includes(s)
+      toStr(r.idconfiguracion ?? r.idinscripcion).includes(s) ||
+      toStr(r.periodo ?? r.idperiodo).includes(s) ||
+      toStr(r.carrera ?? r.idcarrera).includes(s) ||
+      toStr(r.docente ?? r.iddocente).includes(s)
     );
   };
 
@@ -46,7 +49,6 @@ const Inscripciones = () => {
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar'
     }).then(r => r.isConfirmed);
-
     if (!ok) return;
 
     try {
@@ -58,17 +60,16 @@ const Inscripciones = () => {
     }
   };
 
-  const filteredRows = rows.filter(filtrar);
+  // Seguro incluso si rows llega null/undefined
+  const safeRows = Array.isArray(rows) ? rows : [];
+  const filteredRows = safeRows.filter(filtrar);
 
   return (
     <Layout>
       {/* Encabezado */}
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-2xl font-extrabold text-eco-700">Inscripciones</h2>
-        <button
-          className="btn-primary"
-          onClick={() => navigate('/inscripciones/agregar')}
-        >
+        <button className="btn-primary" onClick={() => navigate('/inscripciones/agregar')}>
           Agregar
         </button>
       </div>
@@ -91,10 +92,7 @@ const Inscripciones = () => {
           <div className="py-10 text-center">
             <p className="text-gray-500">No se encontraron resultados.</p>
             <div className="mt-3">
-              <button
-                className="btn-primary"
-                onClick={() => navigate('/inscripciones/agregar')}
-              >
+              <button className="btn-primary" onClick={() => navigate('/inscripciones/agregar')}>
                 Agregar nuevo
               </button>
             </div>
@@ -115,16 +113,16 @@ const Inscripciones = () => {
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
                 {filteredRows.map((r) => {
-                  const rowId = r.idconfiguracion ?? r.idinscripcion;
+                  const rowId = r?.idconfiguracion ?? r?.idinscripcion;
                   return (
                     <tr key={rowId} className="hover:bg-gray-50">
                       <td className="px-4 py-2">{rowId}</td>
-                      <td className="px-4 py-2">{r.periodo ?? r.idperiodo}</td>
-                      <td className="px-4 py-2">{r.carrera ?? r.idcarrera}</td>
-                      <td className="px-4 py-2">{r.docente ?? r.iddocente}</td>
-                      <td className="px-4 py-2">{r.horas_requeridas}</td>
+                      <td className="px-4 py-2">{r?.periodo ?? r?.idperiodo}</td>
+                      <td className="px-4 py-2">{r?.carrera ?? r?.idcarrera}</td>
+                      <td className="px-4 py-2">{r?.docente ?? r?.iddocente}</td>
+                      <td className="px-4 py-2">{r?.horas_requeridas}</td>
                       <td className="px-4 py-2">
-                        {Number(r.estado) === 1 ? (
+                        {Number(r?.estado) === 1 ? (
                           <span className="inline-flex items-center rounded-full bg-eco-600/10 px-2 py-0.5 text-xs font-semibold text-eco-600">
                             Activo
                           </span>
