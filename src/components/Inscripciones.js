@@ -10,6 +10,8 @@ const Inscripciones = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const filteredRows = rows.filter(filtrar);
+
   const cargar = async () => {
     setLoading(true);
     try {
@@ -82,6 +84,19 @@ const Inscripciones = () => {
       <div className="bg-white border-2 border-itsup-600/10 rounded-2xl p-4 shadow-soft">
         {loading ? (
           <p className="text-gray-500">Cargando…</p>
+        ) : filteredRows.length === 0 ? (
+          // Estado vacío sin fila dentro de la tabla
+          <div className="py-10 text-center">
+            <p className="text-gray-500">No se encontraron resultados.</p>
+            <div className="mt-3">
+              <button
+                className="btn-primary"
+                onClick={() => navigate('/inscripciones/agregar')}
+              >
+                Agregar nuevo
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden text-sm">
@@ -97,7 +112,7 @@ const Inscripciones = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {rows.filter(filtrar).map((r) => (
+                {filteredRows.map((r) => (
                   <tr key={r.idconfiguracion ?? r.idinscripcion} className="hover:bg-gray-50">
                     <td className="px-4 py-2">{r.idconfiguracion ?? r.idinscripcion}</td>
                     <td className="px-4 py-2">{r.periodo ?? r.idperiodo}</td>
@@ -133,13 +148,6 @@ const Inscripciones = () => {
                     </td>
                   </tr>
                 ))}
-                {rows.length === 0 && (
-                  <tr>
-                    <td colSpan="7" className="px-4 py-3 text-center text-gray-500">
-                      Sin registros
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>
