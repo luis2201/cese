@@ -4,13 +4,13 @@ import { getData, deleteData } from '../services/apiService';
 import Swal from 'sweetalert2';
 import Layout from './Layout';
 
+const filteredRows = rows.filter(filtrar);
+
 const Inscripciones = () => {
   const [rows, setRows] = useState([]);
   const [filtro, setFiltro] = useState('');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
-  const filteredRows = rows.filter(filtrar);
 
   const cargar = async () => {
     setLoading(true);
