@@ -5,7 +5,6 @@ import Swal from 'sweetalert2';
 import Layout from './Layout';
 
 const Inscripciones = () => {
-  const filteredRows = rows.filter(filtrar);
   const [rows, setRows] = useState([]);
   const [filtro, setFiltro] = useState('');
   const [loading, setLoading] = useState(true);
@@ -23,13 +22,15 @@ const Inscripciones = () => {
     }
   };
 
-  useEffect(() => { cargar(); }, []);
+  useEffect(() => {
+    cargar();
+  }, []);
 
   const filtrar = (r) => {
     if (!filtro.trim()) return true;
     const s = filtro.toLowerCase();
     return (
-      String(r.idconfiguracion ?? r.idinscripcion ?? '').includes(s) ||
+      String(r.idconfiguracion ?? r.idinscripcion ?? '').toLowerCase().includes(s) ||
       String(r.periodo ?? r.idperiodo ?? '').toLowerCase().includes(s) ||
       String(r.carrera ?? r.idcarrera ?? '').toLowerCase().includes(s) ||
       String(r.docente ?? r.iddocente ?? '').toLowerCase().includes(s)
@@ -45,6 +46,7 @@ const Inscripciones = () => {
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar'
     }).then(r => r.isConfirmed);
+
     if (!ok) return;
 
     try {
@@ -56,13 +58,15 @@ const Inscripciones = () => {
     }
   };
 
+  const filteredRows = rows.filter(filtrar);
+
   return (
     <Layout>
       {/* Encabezado */}
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-2xl font-extrabold text-eco-700">Inscripciones</h2>
         <button
-          className="px-4 py-2 rounded-lg font-semibold text-white bg-gradient-to-r from-eco-600 to-itsup-600 shadow hover:shadow-lg transition"
+          className="btn-primary"
           onClick={() => navigate('/inscripciones/agregar')}
         >
           Agregar
@@ -70,21 +74,20 @@ const Inscripciones = () => {
       </div>
 
       {/* Filtro */}
-      <div className="bg-white border-2 border-itsup-600/10 rounded-2xl p-4 shadow-soft mb-6">
+      <div className="card mb-6">
         <input
-          className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-itsup-600/40 focus:border-itsup-600"
+          className="input"
           placeholder="Buscar por ID, periodo, carrera o docente…"
           value={filtro}
           onChange={(e) => setFiltro(e.target.value)}
         />
       </div>
 
-      {/* Tabla */}
-      <div className="bg-white border-2 border-itsup-600/10 rounded-2xl p-4 shadow-soft">
+      {/* Tabla / Estados */}
+      <div className="card">
         {loading ? (
           <p className="text-gray-500">Cargando…</p>
         ) : filteredRows.length === 0 ? (
-          // Estado vacío sin fila dentro de la tabla
           <div className="py-10 text-center">
             <p className="text-gray-500">No se encontraron resultados.</p>
             <div className="mt-3">
@@ -111,42 +114,45 @@ const Inscripciones = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {filteredRows.map((r) => (
-                  <tr key={r.idconfiguracion ?? r.idinscripcion} className="hover:bg-gray-50">
-                    <td className="px-4 py-2">{r.idconfiguracion ?? r.idinscripcion}</td>
-                    <td className="px-4 py-2">{r.periodo ?? r.idperiodo}</td>
-                    <td className="px-4 py-2">{r.carrera ?? r.idcarrera}</td>
-                    <td className="px-4 py-2">{r.docente ?? r.iddocente}</td>
-                    <td className="px-4 py-2">{r.horas_requeridas}</td>
-                    <td className="px-4 py-2">
-                      {Number(r.estado) === 1 ? (
-                        <span className="inline-flex items-center rounded-full bg-eco-600/10 px-2 py-0.5 text-xs font-semibold text-eco-600">
-                          Activo
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full bg-red-600/10 px-2 py-0.5 text-xs font-semibold text-red-600">
-                          Inactivo
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-2 text-center">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          className="px-3 py-1 rounded-md bg-yellow-400 text-white text-xs font-semibold hover:bg-yellow-500 transition"
-                          onClick={() => navigate(`/inscripciones/editar/${r.idconfiguracion ?? r.idinscripcion}`)}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          className="px-3 py-1 rounded-md bg-red-600 text-white text-xs font-semibold hover:bg-red-700 transition"
-                          onClick={() => onEliminar(r.idconfiguracion ?? r.idinscripcion)}
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {filteredRows.map((r) => {
+                  const rowId = r.idconfiguracion ?? r.idinscripcion;
+                  return (
+                    <tr key={rowId} className="hover:bg-gray-50">
+                      <td className="px-4 py-2">{rowId}</td>
+                      <td className="px-4 py-2">{r.periodo ?? r.idperiodo}</td>
+                      <td className="px-4 py-2">{r.carrera ?? r.idcarrera}</td>
+                      <td className="px-4 py-2">{r.docente ?? r.iddocente}</td>
+                      <td className="px-4 py-2">{r.horas_requeridas}</td>
+                      <td className="px-4 py-2">
+                        {Number(r.estado) === 1 ? (
+                          <span className="inline-flex items-center rounded-full bg-eco-600/10 px-2 py-0.5 text-xs font-semibold text-eco-600">
+                            Activo
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center rounded-full bg-red-600/10 px-2 py-0.5 text-xs font-semibold text-red-600">
+                            Inactivo
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 text-center">
+                        <div className="flex justify-center gap-2">
+                          <button
+                            className="px-3 py-1 rounded-md bg-yellow-400 text-white text-xs font-semibold hover:bg-yellow-500 transition"
+                            onClick={() => navigate(`/inscripciones/editar/${rowId}`)}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            className="px-3 py-1 rounded-md bg-red-600 text-white text-xs font-semibold hover:bg-red-700 transition"
+                            onClick={() => onEliminar(rowId)}
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
