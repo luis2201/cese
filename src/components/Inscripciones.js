@@ -4,9 +4,8 @@ import { getData, deleteData } from '../services/apiService';
 import Swal from 'sweetalert2';
 import Layout from './Layout';
 
-const filteredRows = rows.filter(filtrar);
-
 const Inscripciones = () => {
+  const filteredRows = rows.filter(filtrar);
   const [rows, setRows] = useState([]);
   const [filtro, setFiltro] = useState('');
   const [loading, setLoading] = useState(true);
