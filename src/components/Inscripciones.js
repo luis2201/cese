@@ -1,11 +1,22 @@
+// src/components/Inscripciones.js
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getData, deleteData } from '../services/apiService';
 import Swal from 'sweetalert2';
 import Layout from './Layout';
 
+const formatDate = (isoLike) => {
+  if (!isoLike) return '';
+  const d = new Date(isoLike);
+  if (isNaN(d.getTime())) return String(isoLike); // si viene en otro formato, muéstralo tal cual
+  // dd/mm/yyyy
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+};
+
 const Inscripciones = () => {
-  // Siempre inicializa en [] para evitar accesos antes de tiempo
   const [rows, setRows] = useState([]);
   const [filtro, setFiltro] = useState('');
   const [loading, setLoading] = useState(true);
@@ -14,8 +25,7 @@ const Inscripciones = () => {
   const cargar = async () => {
     setLoading(true);
     try {
-      const data = await getData('inscripciones', true);
-      // Garantiza que rows siempre sea un array
+      const data = await getData('inscripciones', true); // este endpoint ahora debe devolver los campos de tu SELECT
       setRows(Array.isArray(data) ? data : []);
     } catch {
       setRows([]);
@@ -24,26 +34,25 @@ const Inscripciones = () => {
     }
   };
 
-  useEffect(() => {
-    cargar();
-  }, []);
+  useEffect(() => { cargar(); }, []);
 
+  const toStr = (v) => String(v ?? '').toLowerCase();
   const filtrar = (r) => {
     const s = (filtro || '').toLowerCase().trim();
     if (!s) return true;
-    const toStr = (v) => String(v ?? '').toLowerCase();
     return (
-      toStr(r.idconfiguracion ?? r.idinscripcion).includes(s) ||
-      toStr(r.periodo ?? r.idperiodo).includes(s) ||
-      toStr(r.carrera ?? r.idcarrera).includes(s) ||
-      toStr(r.docente ?? r.iddocente).includes(s)
+      toStr(r.idinscripcion).includes(s) ||
+      toStr(r.numero_matricula).includes(s) ||
+      toStr(r.estudiante).includes(s) ||
+      toStr(r.fecha_inscripcion).includes(s) ||
+      toStr(Number(r.estado) === 1 ? 'activo' : 'inactivo').includes(s)
     );
   };
 
   const onEliminar = async (id) => {
     const ok = await Swal.fire({
       icon: 'warning',
-      title: '¿Eliminar registro?',
+      title: '¿Eliminar inscripción?',
       text: 'Esta acción no se puede deshacer.',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
@@ -60,7 +69,6 @@ const Inscripciones = () => {
     }
   };
 
-  // Seguro incluso si rows llega null/undefined
   const safeRows = Array.isArray(rows) ? rows : [];
   const filteredRows = safeRows.filter(filtrar);
 
@@ -78,7 +86,7 @@ const Inscripciones = () => {
       <div className="card mb-6">
         <input
           className="input"
-          placeholder="Buscar por ID, periodo, carrera o docente…"
+          placeholder="Buscar por matrícula, estudiante, fecha o estado…"
           value={filtro}
           onChange={(e) => setFiltro(e.target.value)}
         />
@@ -103,24 +111,22 @@ const Inscripciones = () => {
               <thead className="bg-itsup-600 text-white">
                 <tr>
                   <th className="px-4 py-2 text-left">ID</th>
-                  <th className="px-4 py-2 text-left">Periodo</th>
-                  <th className="px-4 py-2 text-left">Carrera</th>
-                  <th className="px-4 py-2 text-left">Docente</th>
-                  <th className="px-4 py-2 text-left">Horas requeridas</th>
+                  <th className="px-4 py-2 text-left">Matrícula</th>
+                  <th className="px-4 py-2 text-left">Estudiante</th>
+                  <th className="px-4 py-2 text-left">Fecha de inscripción</th>
                   <th className="px-4 py-2 text-left">Estado</th>
                   <th className="px-4 py-2 text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
                 {filteredRows.map((r) => {
-                  const rowId = r?.idconfiguracion ?? r?.idinscripcion;
+                  const rowId = r?.idinscripcion;
                   return (
                     <tr key={rowId} className="hover:bg-gray-50">
                       <td className="px-4 py-2">{rowId}</td>
-                      <td className="px-4 py-2">{r?.periodo ?? r?.idperiodo}</td>
-                      <td className="px-4 py-2">{r?.carrera ?? r?.idcarrera}</td>
-                      <td className="px-4 py-2">{r?.docente ?? r?.iddocente}</td>
-                      <td className="px-4 py-2">{r?.horas_requeridas}</td>
+                      <td className="px-4 py-2">{r?.numero_matricula}</td>
+                      <td className="px-4 py-2">{r?.estudiante}</td>
+                      <td className="px-4 py-2">{formatDate(r?.fecha_inscripcion)}</td>
                       <td className="px-4 py-2">
                         {Number(r?.estado) === 1 ? (
                           <span className="inline-flex items-center rounded-full bg-eco-600/10 px-2 py-0.5 text-xs font-semibold text-eco-600">

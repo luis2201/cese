@@ -4,7 +4,7 @@ import { getData, deleteData } from '../services/apiService';
 import Swal from 'sweetalert2';
 import Layout from './Layout';
 
-const Inscripciones = () => {
+const Configuraciones = () => {
   // Siempre inicializa en [] para evitar accesos antes de tiempo
   const [rows, setRows] = useState([]);
   const [filtro, setFiltro] = useState('');
@@ -14,7 +14,7 @@ const Inscripciones = () => {
   const cargar = async () => {
     setLoading(true);
     try {
-      const data = await getData('inscripciones', true);
+      const data = await getData('configuraciones', true);
       // Garantiza que rows siempre sea un array
       setRows(Array.isArray(data) ? data : []);
     } catch {
