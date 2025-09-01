@@ -3,6 +3,8 @@ import PrivateRoute from './components/PrivateRoute';
 import PublicRoute from './components/PublicRoute';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
+import Configuraciones from './components/Configuraciones';
+import ConfiguracionForm from './components/ConfiguracionForm';
 import Inscripciones from './components/Inscripciones';
 import InscripcionForm from './components/InscripcionForm';
 
@@ -18,9 +20,14 @@ function App() {
 
         {/* Rutas privadas */}
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/configuraciones" element={<PrivateRoute><Configuraciones /></PrivateRoute>} />
+        <Route path="/configuraciones/agregar" element={<PrivateRoute><ConfiguracionForm /></PrivateRoute>} />
+        <Route path="/configuraciones/editar/:id" element={<PrivateRoute><ConfiguracionForm /></PrivateRoute>} />
+        <Route path="/configuraciones" element={<PrivateRoute><Configuraciones /></PrivateRoute>} />
         <Route path="/inscripciones" element={<PrivateRoute><Inscripciones /></PrivateRoute>} />
         <Route path="/inscripciones/agregar" element={<PrivateRoute><InscripcionForm /></PrivateRoute>} />
         <Route path="/inscripciones/editar/:id" element={<PrivateRoute><InscripcionForm /></PrivateRoute>} />
+        <Route path="/inscripciones" element={<PrivateRoute><Inscripciones /></PrivateRoute>} />
 
         {/* 404 -> login */}
         <Route path="*" element={<Navigate to="/login" replace />} />
