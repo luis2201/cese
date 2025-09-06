@@ -5,7 +5,6 @@ import Swal from 'sweetalert2';
 import Layout from './Layout';
 
 const Configuraciones = () => {
-  // Siempre inicializa en [] para evitar accesos antes de tiempo
   const [rows, setRows] = useState([]);
   const [filtro, setFiltro] = useState('');
   const [loading, setLoading] = useState(true);
@@ -14,8 +13,8 @@ const Configuraciones = () => {
   const cargar = async () => {
     setLoading(true);
     try {
+      // Endpoint que debe devolver los campos de tu SELECT
       const data = await getData('configuraciones', true);
-      // Garantiza que rows siempre sea un array
       setRows(Array.isArray(data) ? data : []);
     } catch {
       setRows([]);
@@ -24,35 +23,35 @@ const Configuraciones = () => {
     }
   };
 
-  useEffect(() => {
-    cargar();
-  }, []);
+  useEffect(() => { cargar(); }, []);
 
+  const toStr = (v) => String(v ?? '').toLowerCase();
   const filtrar = (r) => {
     const s = (filtro || '').toLowerCase().trim();
     if (!s) return true;
-    const toStr = (v) => String(v ?? '').toLowerCase();
     return (
-      toStr(r.idconfiguracion ?? r.idinscripcion).includes(s) ||
-      toStr(r.periodo ?? r.idperiodo).includes(s) ||
-      toStr(r.carrera ?? r.idcarrera).includes(s) ||
-      toStr(r.docente ?? r.iddocente).includes(s)
+      toStr(r.idconfiguracion).includes(s) ||
+      toStr(r.periodo).includes(s) ||
+      toStr(r.carrera).includes(s) ||
+      toStr(r.docente).includes(s) ||
+      toStr(r.horas_requeridas).includes(s) ||
+      toStr(Number(r.estado) === 1 ? 'activo' : 'inactivo').includes(s)
     );
   };
 
   const onEliminar = async (id) => {
     const ok = await Swal.fire({
       icon: 'warning',
-      title: '¿Eliminar registro?',
+      title: '¿Eliminar configuración?',
       text: 'Esta acción no se puede deshacer.',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
-    }).then(r => r.isConfirmed);
+      cancelButtonText: 'Cancelar',
+    }).then((r) => r.isConfirmed);
     if (!ok) return;
 
     try {
-      await deleteData(`inscripciones/${id}`, true);
+      await deleteData(`configuraciones/${id}`, true);
       await Swal.fire({ icon: 'success', title: 'Eliminado', timer: 900, showConfirmButton: false });
       cargar();
     } catch (e) {
@@ -60,7 +59,6 @@ const Configuraciones = () => {
     }
   };
 
-  // Seguro incluso si rows llega null/undefined
   const safeRows = Array.isArray(rows) ? rows : [];
   const filteredRows = safeRows.filter(filtrar);
 
@@ -68,8 +66,11 @@ const Configuraciones = () => {
     <Layout>
       {/* Encabezado */}
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-extrabold text-eco-700">Inscripciones</h2>
-        <button className="btn-primary" onClick={() => navigate('/inscripciones/agregar')}>
+        <h2 className="text-2xl font-extrabold text-eco-700">Configuraciones</h2>
+        <button
+          className="btn-primary"
+          onClick={() => navigate('/configuraciones/agregar')}
+        >
           Agregar
         </button>
       </div>
@@ -78,7 +79,7 @@ const Configuraciones = () => {
       <div className="card mb-6">
         <input
           className="input"
-          placeholder="Buscar por ID, periodo, carrera o docente…"
+          placeholder="Buscar por docente, periodo, carrera…"
           value={filtro}
           onChange={(e) => setFiltro(e.target.value)}
         />
@@ -92,7 +93,10 @@ const Configuraciones = () => {
           <div className="py-10 text-center">
             <p className="text-gray-500">No se encontraron resultados.</p>
             <div className="mt-3">
-              <button className="btn-primary" onClick={() => navigate('/inscripciones/agregar')}>
+              <button
+                className="btn-primary"
+                onClick={() => navigate('/configuraciones/agregar')}
+              >
                 Agregar nuevo
               </button>
             </div>
@@ -113,13 +117,13 @@ const Configuraciones = () => {
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
                 {filteredRows.map((r) => {
-                  const rowId = r?.idconfiguracion ?? r?.idinscripcion;
+                  const rowId = r?.idconfiguracion;
                   return (
                     <tr key={rowId} className="hover:bg-gray-50">
                       <td className="px-4 py-2">{rowId}</td>
-                      <td className="px-4 py-2">{r?.periodo ?? r?.idperiodo}</td>
-                      <td className="px-4 py-2">{r?.carrera ?? r?.idcarrera}</td>
-                      <td className="px-4 py-2">{r?.docente ?? r?.iddocente}</td>
+                      <td className="px-4 py-2">{r?.periodo}</td>
+                      <td className="px-4 py-2">{r?.carrera}</td>
+                      <td className="px-4 py-2">{r?.docente}</td>
                       <td className="px-4 py-2">{r?.horas_requeridas}</td>
                       <td className="px-4 py-2">
                         {Number(r?.estado) === 1 ? (
@@ -136,7 +140,7 @@ const Configuraciones = () => {
                         <div className="flex justify-center gap-2">
                           <button
                             className="px-3 py-1 rounded-md bg-yellow-400 text-white text-xs font-semibold hover:bg-yellow-500 transition"
-                            onClick={() => navigate(`/inscripciones/editar/${rowId}`)}
+                            onClick={() => navigate(`/configuraciones/editar/${rowId}`)}
                           >
                             Editar
                           </button>
@@ -160,4 +164,4 @@ const Configuraciones = () => {
   );
 };
 
-export default Inscripciones;
+export default Configuraciones;
