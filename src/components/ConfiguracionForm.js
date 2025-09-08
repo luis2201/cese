@@ -1,41 +1,41 @@
+// src/components/ConfiguracionForm.js
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getData, postData, putData } from '../services/apiService';
 import Swal from 'sweetalert2';
 import Layout from './Layout';
 
-const InscripcionForm = () => {
-  const { id } = useParams();
+const ConfiguracionForm = () => {
+  const { id } = useParams(); // si existe, estamos editando
   const navigate = useNavigate();
 
-  const [periodos, setPeriodos] = useState([]);
-  const [carreras, setCarreras] = useState([]);
-  const [docentes, setDocentes] = useState([]);
+  // catálogos
+  const [periodos, setPeriodos]   = useState([]);
+  const [carreras, setCarreras]   = useState([]);
+  const [docentes, setDocentes]   = useState([]);
 
+  // modelo
   const [form, setForm] = useState({
     idperiodo: '',
     idcarrera: '',
     iddocente: '',
     horas_requeridas: '',
-    estado: 1,
   });
 
-  // flags de error por campo
+  // errores + refs para foco
   const [errors, setErrors] = useState({
     idperiodo: false,
     idcarrera: false,
     iddocente: false,
     horas_requeridas: false,
   });
-
-  // refs para enfocar el primer campo inválido
   const periodoRef = useRef(null);
   const carreraRef = useRef(null);
   const docenteRef = useRef(null);
-  const horasRef = useRef(null);
+  const horasRef   = useRef(null);
 
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [saving,  setSaving]  = useState(false);
 
   const cargarSelects = async () => {
     try {
@@ -55,18 +55,17 @@ const InscripcionForm = () => {
   const cargarRegistro = async () => {
     if (!id) return;
     try {
-      const data = await getData(`inscripciones/${id}`, true);
+      const data = await getData(`configuraciones/${id}`, true);
       if (data) {
         setForm({
           idperiodo: data.idperiodo ?? '',
           idcarrera: data.idcarrera ?? '',
           iddocente: data.iddocente ?? '',
           horas_requeridas: data.horas_requeridas ?? '',
-          estado: Number(data.estado ?? 1),
         });
       }
     } catch {
-      Swal.fire({ icon: 'error', title: 'No se pudo cargar el registro' });
+      Swal.fire({ icon: 'error', title: 'No se pudo cargar la configuración' });
     }
   };
 
@@ -82,7 +81,6 @@ const InscripcionForm = () => {
   const onChange = (e) => {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
-    // al escribir/seleccionar, limpiar error de ese campo
     setErrors((err) => ({ ...err, [name]: false }));
   };
 
@@ -95,20 +93,14 @@ const InscripcionForm = () => {
     };
     setErrors(nuevo);
 
-    // enfocar el primer campo inválido
     if (nuevo.idperiodo && periodoRef.current) periodoRef.current.focus();
     else if (nuevo.idcarrera && carreraRef.current) carreraRef.current.focus();
     else if (nuevo.iddocente && docenteRef.current) docenteRef.current.focus();
     else if (nuevo.horas_requeridas && horasRef.current) horasRef.current.focus();
 
-    // mensaje general
-    const keysInvalidas = Object.keys(nuevo).filter((k) => nuevo[k]);
-    if (keysInvalidas.length) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Faltan datos',
-        text: 'Por favor, complete los campos requeridos.',
-      });
+    const faltan = Object.values(nuevo).some(Boolean);
+    if (faltan) {
+      Swal.fire({ icon: 'warning', title: 'Faltan datos', text: 'Complete los campos requeridos.' });
       return false;
     }
     return true;
@@ -117,7 +109,6 @@ const InscripcionForm = () => {
   const onSubmit = async (e) => {
     e.preventDefault();
     if (saving) return;
-
     if (!validarYMarcar()) return;
 
     setSaving(true);
@@ -127,17 +118,17 @@ const InscripcionForm = () => {
         idcarrera: Number(form.idcarrera),
         iddocente: Number(form.iddocente),
         horas_requeridas: Number(form.horas_requeridas),
-        estado: Number(form.estado),
+        // estado NO se envía; el backend tiene default
       };
 
       if (id) {
-        await putData(`inscripciones/${id}`, payload, true);
+        await putData(`configuraciones/${id}`, payload, true);
         await Swal.fire({ icon: 'success', title: 'Actualizado', timer: 1000, showConfirmButton: false });
       } else {
-        await postData('inscripciones', payload, true);
+        await postData('configuraciones', payload, true);
         await Swal.fire({ icon: 'success', title: 'Registrado', timer: 1000, showConfirmButton: false });
       }
-      navigate('/inscripciones', { replace: true });
+      navigate('/configuraciones', { replace: true });
     } catch (err) {
       Swal.fire({ icon: 'error', title: 'No se pudo guardar', text: err?.message || 'Error' });
     } finally {
@@ -145,19 +136,18 @@ const InscripcionForm = () => {
     }
   };
 
-  // estilos de error (añade borde y halo rojo, y fondo suave)
   const errCls = 'border-red-500 ring-2 ring-red-500 focus:ring-red-500 focus:border-red-500 bg-red-50';
 
   return (
     <Layout>
       <div className="max-w-3xl mx-auto">
         <h2 className="text-2xl font-extrabold text-eco-700 mb-3">
-          {id ? 'Editar Inscripción' : 'Agregar Inscripción'}
+          {id ? 'Editar Configuración' : 'Agregar Configuración'}
         </h2>
 
         <div className="card">
           <div className="mb-4 border-b border-gray-100 pb-3">
-            <h3 className="text-lg font-semibold text-ink">Datos de la inscripción</h3>
+            <h3 className="text-lg font-semibold text-ink">Datos de la configuración</h3>
             <p className="text-sm text-muted">
               Complete los campos requeridos (<span className="text-red-600">*</span>).
             </p>
@@ -257,20 +247,6 @@ const InscripcionForm = () => {
                     aria-invalid={errors.horas_requeridas || undefined}
                   />
                 </div>
-
-                {/* Estado */}
-                <div className="md:col-span-2 md:max-w-xs">
-                  <label className="label">Estado</label>
-                  <select
-                    name="estado"
-                    value={form.estado}
-                    onChange={onChange}
-                    className="select"
-                  >
-                    <option value={1}>Activo</option>
-                    <option value={0}>Inactivo</option>
-                  </select>
-                </div>
               </div>
 
               {/* Botonera */}
@@ -281,7 +257,7 @@ const InscripcionForm = () => {
                 <button
                   type="button"
                   className="btn-secondary w-full sm:w-auto"
-                  onClick={() => navigate('/inscripciones')}
+                  onClick={() => navigate('/configuraciones')}
                   disabled={saving}
                 >
                   Cancelar
@@ -295,4 +271,4 @@ const InscripcionForm = () => {
   );
 };
 
-export default InscripcionForm;
+export default ConfiguracionForm;
