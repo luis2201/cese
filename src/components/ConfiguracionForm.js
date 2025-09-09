@@ -198,7 +198,7 @@ const ConfiguracionForm = () => {
                   >
                     <option value="">Seleccione…</option>
                     {periodos
-                      .filter((p) => Number(p.estado ?? 1) === 1)
+                      //.filter((p) => Number(p.estado ?? 1) === 1)
                       .map((p) => (
                         <option key={p.idperiodo} value={p.idperiodo}>
                           {p.periodo}
