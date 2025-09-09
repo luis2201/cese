@@ -44,6 +44,7 @@ const ConfiguracionForm = () => {
         getData('carreras', true),
         getData('docentes', true),
       ]);
+      console.log(d);
       setPeriodos(Array.isArray(p) ? p : []);
       setCarreras(Array.isArray(c) ? c : []);
       setDocentes(Array.isArray(d) ? d : []);
