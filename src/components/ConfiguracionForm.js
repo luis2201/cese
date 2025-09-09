@@ -156,7 +156,19 @@ const ConfiguracionForm = () => {
       }
       navigate('/configuraciones', { replace: true });
     } catch (err) {
-      Swal.fire({ icon: 'error', title: 'No se pudo guardar', text: err?.message || 'Error' });
+      if (err?.status === 400) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Registro duplicado',
+          text: 'Ya existe un registro con esos datos.',
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo guardar',
+          text: err?.message || 'Error',
+        });
+      }
     } finally {
       setSaving(false);
     }
