@@ -241,13 +241,16 @@ const ConfiguracionForm = () => {
                     value={form.iddocente}
                     onChange={onChange}
                     className={`select ${errors.iddocente ? errCls : ''}`}
+                    aria-invalid={errors.iddocente || undefined}
                   >
                     <option value="">Seleccione…</option>
-                    {docentes.map((d) => (
-                      <option key={d.iddocente} value={d.iddocente}>
-                        {`${d.apellido1} ${d.apellido2}, ${d.nombre1} ${d.nombre2}`}
-                      </option>
-                    ))}
+                    {docentes
+                      .filter((d) => Number(d.estado ?? 1) === 1)
+                      .map((d) => (
+                        <option key={d.iddocente ?? d.id} value={d.iddocente ?? d.id}>
+                          {d.docente ?? d.nombres ?? d.apellido1 + ' ' + d.apellido2 + ', ' + d.nombre1 + ' ' + d.nombre2}
+                        </option>
+                      ))}
                   </select>
                 </div>
 
