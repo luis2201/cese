@@ -221,7 +221,7 @@ const ConfiguracionForm = () => {
                   >
                     <option value="">Seleccione…</option>
                     {carreras
-                      .filter((c) => Number(c.estado ?? 1) === 1)
+                      .filter((c) => Number(c.estado ?? 1) === 1 && (Number(c.idcarrera) === 35 || Number(c.idcarrera) === 50))
                       .map((c) => (
                         <option key={c.idcarrera} value={c.idcarrera}>
                           {c.carrera}
