@@ -1,4 +1,3 @@
-// src/components/ConfiguracionForm.js
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getData, postData, putData } from '../services/apiService';
@@ -6,13 +5,13 @@ import Swal from 'sweetalert2';
 import Layout from './Layout';
 
 const ConfiguracionForm = () => {
-  const { id } = useParams(); // si existe, estamos editando
+  const { id } = useParams();
   const navigate = useNavigate();
 
   // catálogos
-  const [periodos, setPeriodos]   = useState([]);
-  const [carreras, setCarreras]   = useState([]);
-  const [docentes, setDocentes]   = useState([]);
+  const [periodos, setPeriodos] = useState([]);
+  const [carreras, setCarreras] = useState([]);
+  const [docentes, setDocentes] = useState([]);
 
   // modelo
   const [form, setForm] = useState({
@@ -32,27 +31,40 @@ const ConfiguracionForm = () => {
   const periodoRef = useRef(null);
   const carreraRef = useRef(null);
   const docenteRef = useRef(null);
-  const horasRef   = useRef(null);
+  const horasRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
-  const [saving,  setSaving]  = useState(false);
+  const [saving, setSaving] = useState(false);
 
+  // Cargar catálogos básicos
   const cargarSelects = async () => {
     try {
-      const [p, c, d] = await Promise.all([
+      const [p, c] = await Promise.all([
         getData('periodos', true),
         getData('carreras', true),
-        getData('docentes', true),
       ]);
-      console.log(d);
       setPeriodos(Array.isArray(p) ? p : []);
       setCarreras(Array.isArray(c) ? c : []);
-      setDocentes(Array.isArray(d) ? d : []);
     } catch {
-      setPeriodos([]); setCarreras([]); setDocentes([]);
+      setPeriodos([]); setCarreras([]);
     }
   };
 
+  // Cargar docentes según periodo + carrera
+  const cargarDocentes = async (idperiodo, idcarrera) => {
+    if (!idperiodo || !idcarrera) {
+      setDocentes([]);
+      return;
+    }
+    try {
+      const data = await getData(`docentes/periodo/${idperiodo}/carrera/${idcarrera}`, true);
+      setDocentes(Array.isArray(data) ? data : []);
+    } catch {
+      setDocentes([]);
+    }
+  };
+
+  // Cargar registro al editar
   const cargarRegistro = async () => {
     if (!id) return;
     try {
@@ -64,6 +76,9 @@ const ConfiguracionForm = () => {
           iddocente: data.iddocente ?? '',
           horas_requeridas: data.horas_requeridas ?? '',
         });
+
+        // cargar docentes del periodo y carrera guardados
+        await cargarDocentes(data.idperiodo, data.idcarrera);
       }
     } catch {
       Swal.fire({ icon: 'error', title: 'No se pudo cargar la configuración' });
@@ -79,12 +94,23 @@ const ConfiguracionForm = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const onChange = (e) => {
+  // Cambios en los selects
+  const onChange = async (e) => {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
     setErrors((err) => ({ ...err, [name]: false }));
+
+    // cuando cambia periodo o carrera => reset docente y cargar lista
+    if (name === 'idperiodo' || name === 'idcarrera') {
+      const nuevoPeriodo = name === 'idperiodo' ? value : form.idperiodo;
+      const nuevaCarrera = name === 'idcarrera' ? value : form.idcarrera;
+
+      setForm((f) => ({ ...f, iddocente: '' }));
+      await cargarDocentes(nuevoPeriodo, nuevaCarrera);
+    }
   };
 
+  // Validación
   const validarYMarcar = () => {
     const nuevo = {
       idperiodo: !String(form.idperiodo).trim(),
@@ -99,14 +125,14 @@ const ConfiguracionForm = () => {
     else if (nuevo.iddocente && docenteRef.current) docenteRef.current.focus();
     else if (nuevo.horas_requeridas && horasRef.current) horasRef.current.focus();
 
-    const faltan = Object.values(nuevo).some(Boolean);
-    if (faltan) {
+    if (Object.values(nuevo).some(Boolean)) {
       Swal.fire({ icon: 'warning', title: 'Faltan datos', text: 'Complete los campos requeridos.' });
       return false;
     }
     return true;
   };
 
+  // Guardar
   const onSubmit = async (e) => {
     e.preventDefault();
     if (saving) return;
@@ -119,7 +145,6 @@ const ConfiguracionForm = () => {
         idcarrera: Number(form.idcarrera),
         iddocente: Number(form.iddocente),
         horas_requeridas: Number(form.horas_requeridas),
-        // estado NO se envía; el backend tiene default
       };
 
       if (id) {
@@ -170,14 +195,13 @@ const ConfiguracionForm = () => {
                     value={form.idperiodo}
                     onChange={onChange}
                     className={`select ${errors.idperiodo ? errCls : ''}`}
-                    aria-invalid={errors.idperiodo || undefined}
                   >
                     <option value="">Seleccione…</option>
                     {periodos
                       .filter((p) => Number(p.estado ?? 1) === 1)
                       .map((p) => (
-                        <option key={p.idperiodo ?? p.id} value={p.idperiodo ?? p.id}>
-                          {p.periodo ?? p.nombre ?? `${p.anio ?? ''} ${p.nombre ?? ''}`}
+                        <option key={p.idperiodo} value={p.idperiodo}>
+                          {p.periodo}
                         </option>
                       ))}
                   </select>
@@ -194,14 +218,13 @@ const ConfiguracionForm = () => {
                     value={form.idcarrera}
                     onChange={onChange}
                     className={`select ${errors.idcarrera ? errCls : ''}`}
-                    aria-invalid={errors.idcarrera || undefined}
                   >
                     <option value="">Seleccione…</option>
                     {carreras
                       .filter((c) => Number(c.estado ?? 1) === 1)
                       .map((c) => (
-                        <option key={c.idcarrera ?? c.id} value={c.idcarrera ?? c.id}>
-                          {c.carrera ?? c.nombre}
+                        <option key={c.idcarrera} value={c.idcarrera}>
+                          {c.carrera}
                         </option>
                       ))}
                   </select>
@@ -218,16 +241,13 @@ const ConfiguracionForm = () => {
                     value={form.iddocente}
                     onChange={onChange}
                     className={`select ${errors.iddocente ? errCls : ''}`}
-                    aria-invalid={errors.iddocente || undefined}
                   >
                     <option value="">Seleccione…</option>
-                    {docentes
-                      .filter((d) => Number(d.estado ?? 1) === 1)
-                      .map((d) => (
-                        <option key={d.iddocente ?? d.id} value={d.iddocente ?? d.id}>
-                          {d.docente ?? d.nombres ?? d.nombre}
-                        </option>
-                      ))}
+                    {docentes.map((d) => (
+                      <option key={d.iddocente} value={d.iddocente}>
+                        {`${d.apellido1} ${d.apellido2}, ${d.nombre1} ${d.nombre2}`}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -245,7 +265,6 @@ const ConfiguracionForm = () => {
                     min={1}
                     className={`input ${errors.horas_requeridas ? errCls : ''}`}
                     placeholder="Ej. 120"
-                    aria-invalid={errors.horas_requeridas || undefined}
                   />
                 </div>
               </div>
