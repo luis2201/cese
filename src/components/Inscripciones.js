@@ -1,15 +1,13 @@
-// src/components/Inscripciones.js
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getData, deleteData } from '../services/apiService';
+import { getData, deleteData, putData } from '../services/apiService';
 import Swal from 'sweetalert2';
 import Layout from './Layout';
 
 const formatDate = (isoLike) => {
   if (!isoLike) return '';
   const d = new Date(isoLike);
-  if (isNaN(d.getTime())) return String(isoLike); // si viene en otro formato, muéstralo tal cual
-  // dd/mm/yyyy
+  if (isNaN(d.getTime())) return String(isoLike);
   const dd = String(d.getDate()).padStart(2, '0');
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const yyyy = d.getFullYear();
@@ -25,7 +23,7 @@ const Inscripciones = () => {
   const cargar = async () => {
     setLoading(true);
     try {
-      const data = await getData('inscripciones', true); // este endpoint ahora debe devolver los campos de tu SELECT
+      const data = await getData('inscripciones', true);
       setRows(Array.isArray(data) ? data : []);
     } catch {
       setRows([]);
@@ -40,32 +38,54 @@ const Inscripciones = () => {
   const filtrar = (r) => {
     const s = (filtro || '').toLowerCase().trim();
     if (!s) return true;
+    const estadoTxt = Number(r.estado) === 1 ? 'aprobada' : 'pendiente';
     return (
       toStr(r.idinscripcion).includes(s) ||
       toStr(r.numero_matricula).includes(s) ||
       toStr(r.estudiante).includes(s) ||
       toStr(r.fecha_inscripcion).includes(s) ||
-      toStr(Number(r.estado) === 1 ? 'activo' : 'inactivo').includes(s)
+      estadoTxt.includes(s)
     );
   };
 
-  const onEliminar = async (id) => {
+  const onRechazar = async (id) => {
     const ok = await Swal.fire({
       icon: 'warning',
-      title: '¿Eliminar inscripción?',
-      text: 'Esta acción no se puede deshacer.',
+      title: '¿Rechazar inscripción?',
+      text: 'Esta acción eliminará la inscripción.',
       showCancelButton: true,
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
+      confirmButtonText: 'Sí, rechazar',
+      cancelButtonText: 'Cancelar',
     }).then(r => r.isConfirmed);
     if (!ok) return;
 
     try {
-      await deleteData(`inscripciones/${id}`, true);
-      await Swal.fire({ icon: 'success', title: 'Eliminado', timer: 900, showConfirmButton: false });
+      await deleteData(`inscripciones/${id}`, true); // mismo endpoint de eliminar
+      await Swal.fire({ icon: 'success', title: 'Inscripción rechazada', timer: 900, showConfirmButton: false });
       cargar();
     } catch (e) {
-      Swal.fire({ icon: 'error', title: 'No se pudo eliminar', text: e?.message || 'Error' });
+      Swal.fire({ icon: 'error', title: 'No se pudo rechazar', text: e?.message || 'Error' });
+    }
+  };
+
+  const onAprobar = async (id) => {
+    const ok = await Swal.fire({
+      icon: 'question',
+      title: '¿Aprobar inscripción?',
+      text: 'La inscripción pasará a estado Aprobada.',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, aprobar',
+      cancelButtonText: 'Cancelar',
+    }).then(r => r.isConfirmed);
+    if (!ok) return;
+
+    try {
+      // patrón acordado: PUT /inscripciones/:id/activ
+      await putData(`inscripciones/${id}/activ`, null, true);
+      await Swal.fire({ icon: 'success', title: 'Inscripción aprobada', timer: 900, showConfirmButton: false });
+      cargar();
+    } catch (e) {
+      Swal.fire({ icon: 'error', title: 'No se pudo aprobar', text: e?.message || 'Error' });
     }
   };
 
@@ -121,6 +141,7 @@ const Inscripciones = () => {
               <tbody className="divide-y divide-gray-200 bg-white">
                 {filteredRows.map((r) => {
                   const rowId = r?.idinscripcion;
+                  const isAprobada = Number(r?.estado) === 1;
                   return (
                     <tr key={rowId} className="hover:bg-gray-50">
                       <td className="px-4 py-2">{rowId}</td>
@@ -128,29 +149,42 @@ const Inscripciones = () => {
                       <td className="px-4 py-2">{r?.estudiante}</td>
                       <td className="px-4 py-2">{formatDate(r?.fecha_inscripcion)}</td>
                       <td className="px-4 py-2">
-                        {Number(r?.estado) === 1 ? (
+                        {isAprobada ? (
                           <span className="inline-flex items-center rounded-full bg-eco-600/10 px-2 py-0.5 text-xs font-semibold text-eco-600">
-                            Activo
+                            Aprobada
                           </span>
                         ) : (
-                          <span className="inline-flex items-center rounded-full bg-red-600/10 px-2 py-0.5 text-xs font-semibold text-red-600">
-                            Inactivo
+                          <span className="inline-flex items-center rounded-full bg-yellow-500/10 px-2 py-0.5 text-xs font-semibold text-yellow-600">
+                            Pendiente
                           </span>
                         )}
                       </td>
                       <td className="px-4 py-2 text-center">
                         <div className="flex justify-center gap-2">
+                          {/* Aprobar si está pendiente */}
+                          {!isAprobada && (
+                            <button
+                              className="px-3 py-1 rounded-md bg-eco-600 text-white text-xs font-semibold hover:bg-eco-700 transition"
+                              onClick={() => onAprobar(rowId)}
+                            >
+                              Aprobar
+                            </button>
+                          )}
+
+                          {/* Rechazar (usa delete) siempre disponible */}
+                          <button
+                            className="px-3 py-1 rounded-md bg-red-600 text-white text-xs font-semibold hover:bg-red-700 transition"
+                            onClick={() => onRechazar(rowId)}
+                          >
+                            Rechazar
+                          </button>
+
+                          {/* Editar (opcional) */}
                           <button
                             className="px-3 py-1 rounded-md bg-yellow-400 text-white text-xs font-semibold hover:bg-yellow-500 transition"
                             onClick={() => navigate(`/inscripciones/editar/${rowId}`)}
                           >
                             Editar
-                          </button>
-                          <button
-                            className="px-3 py-1 rounded-md bg-red-600 text-white text-xs font-semibold hover:bg-red-700 transition"
-                            onClick={() => onEliminar(rowId)}
-                          >
-                            Eliminar
                           </button>
                         </div>
                       </td>
