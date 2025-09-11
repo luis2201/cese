@@ -153,7 +153,8 @@ const Configuraciones = () => {
                                 }).then(res => res.isConfirmed);
                                 if (!ok) return;
                                 try {
-                                  await putData(`configuraciones/${r.idconfiguracion}/estado`, { estado: 1 }, true);
+                                  await putData(`configuraciones/${r.idconfiguracion}/activar`, { estado: 1 }, true);
+                                  
                                   await Swal.fire({ icon: 'success', title: 'Activada', timer: 900, showConfirmButton: false });
                                   cargar();
                                 } catch (err) {
