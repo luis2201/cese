@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { getData, deleteData, putData } from '../services/apiService';
 import Swal from 'sweetalert2';
 import Layout from './Layout';
@@ -18,7 +17,6 @@ const Inscripciones = () => {
   const [rows, setRows] = useState([]);
   const [filtro, setFiltro] = useState('');
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   const cargar = async () => {
     setLoading(true);
@@ -81,7 +79,7 @@ const Inscripciones = () => {
 
     try {
       // patrón acordado: PUT /inscripciones/:id/activ
-      await putData(`inscripciones/${id}/activ`, null, true);
+      await putData(`inscripciones/${id}/activar`, null, true);
       await Swal.fire({ icon: 'success', title: 'Inscripción aprobada', timer: 900, showConfirmButton: false });
       cargar();
     } catch (e) {
