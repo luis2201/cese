@@ -93,15 +93,7 @@ const Inscripciones = () => {
   const filteredRows = safeRows.filter(filtrar);
 
   return (
-    <Layout>
-      {/* Encabezado */}
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-extrabold text-eco-700">Inscripciones</h2>
-        <button className="btn-primary" onClick={() => navigate('/inscripciones/agregar')}>
-          Agregar
-        </button>
-      </div>
-
+    <Layout>            
       {/* Filtro */}
       <div className="card mb-6">
         <input
@@ -120,9 +112,7 @@ const Inscripciones = () => {
           <div className="py-10 text-center">
             <p className="text-gray-500">No se encontraron resultados.</p>
             <div className="mt-3">
-              <button className="btn-primary" onClick={() => navigate('/inscripciones/agregar')}>
-                Agregar nuevo
-              </button>
+                            
             </div>
           </div>
         ) : (
