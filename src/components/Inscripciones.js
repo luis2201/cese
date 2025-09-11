@@ -112,7 +112,7 @@ const Inscripciones = () => {
           <div className="py-10 text-center">
             <p className="text-gray-500">No se encontraron resultados.</p>
             <div className="mt-3">
-                            
+
             </div>
           </div>
         ) : (
@@ -168,14 +168,7 @@ const Inscripciones = () => {
                           >
                             Rechazar
                           </button>
-
-                          {/* Editar (opcional) */}
-                          <button
-                            className="px-3 py-1 rounded-md bg-yellow-400 text-white text-xs font-semibold hover:bg-yellow-500 transition"
-                            onClick={() => navigate(`/inscripciones/editar/${rowId}`)}
-                          >
-                            Editar
-                          </button>
+                          
                         </div>
                       </td>
                     </tr>
