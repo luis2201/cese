@@ -138,20 +138,53 @@ const Configuraciones = () => {
                       </td>
                       <td className="px-4 py-2 text-center">
                         <div className="flex justify-center gap-2">
+                          {/* Activar solo cuando está inactivo */}
+                          {Number(r?.estado) === 0 && (
+                            <button
+                              className="px-3 py-1 rounded-md bg-eco-600 text-white text-xs font-semibold hover:bg-eco-700 transition"
+                              onClick={async () => {
+                                const ok = await Swal.fire({
+                                  icon: 'question',
+                                  title: '¿Activar?',
+                                  text: 'La configuración será marcada como activa.',
+                                  showCancelButton: true,
+                                  confirmButtonText: 'Sí, activar',
+                                  cancelButtonText: 'Cancelar',
+                                }).then(res => res.isConfirmed);
+                                if (!ok) return;
+                                try {
+                                  await patchData(`configuraciones/${r.idconfiguracion}/estado`, { estado: 1 }, true);
+                                  await Swal.fire({ icon: 'success', title: 'Activada', timer: 900, showConfirmButton: false });
+                                  cargar();
+                                } catch (err) {
+                                  Swal.fire({ icon: 'error', title: 'No se pudo activar', text: err?.message || 'Error' });
+                                }
+                              }}
+                            >
+                              Activar
+                            </button>
+                          )}
+
+                          {/* Editar */}
                           <button
                             className="px-3 py-1 rounded-md bg-yellow-400 text-white text-xs font-semibold hover:bg-yellow-500 transition"
-                            onClick={() => navigate(`/configuraciones/editar/${rowId}`)}
+                            onClick={() => navigate(`/configuraciones/editar/${r.idconfiguracion}`)}
                           >
                             Editar
                           </button>
-                          <button
-                            className="px-3 py-1 rounded-md bg-red-600 text-white text-xs font-semibold hover:bg-red-700 transition"
-                            onClick={() => onEliminar(rowId)}
-                          >
-                            Eliminar
-                          </button>
+
+                          {/* Eliminar (desactiva cuando estado = 1) */}
+                          {Number(r?.estado) === 1 && (
+                            <button
+                              className="px-3 py-1 rounded-md bg-red-600 text-white text-xs font-semibold hover:bg-red-700 transition"
+                              onClick={() => onEliminar(r.idconfiguracion)}
+                            >
+                              Eliminar
+                            </button>
+                          )}
                         </div>
                       </td>
+
                     </tr>
                   );
                 })}
