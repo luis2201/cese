@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getData, deleteData } from '../services/apiService';
+import { getData, deleteData, putData } from '../services/apiService';
 import Swal from 'sweetalert2';
 import Layout from './Layout';
 
@@ -153,7 +153,7 @@ const Configuraciones = () => {
                                 }).then(res => res.isConfirmed);
                                 if (!ok) return;
                                 try {
-                                  await patchData(`configuraciones/${r.idconfiguracion}/estado`, { estado: 1 }, true);
+                                  await putData(`configuraciones/${r.idconfiguracion}/estado`, { estado: 1 }, true);
                                   await Swal.fire({ icon: 'success', title: 'Activada', timer: 900, showConfirmButton: false });
                                   cargar();
                                 } catch (err) {
