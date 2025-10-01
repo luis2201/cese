@@ -26,7 +26,7 @@ function buildTree(items) {
     // Orden opcional por Menu
     const sortRec = (nodes) => {
         // nodes.sort((a, b) => a.Menu.localeCompare(b.Menu));
-        nodes.sort((a, b) => a.ID(b.ID));
+        nodes.sort((a, b) => a.Menu.localeCompare(b.Menu));
         nodes.forEach(n => sortRec(n.children));
     };
     sortRec(roots);
