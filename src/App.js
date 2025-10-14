@@ -6,6 +6,8 @@ import Dashboard from './components/Dashboard';
 import Configuraciones from './components/Configuraciones';
 import ConfiguracionForm from './components/ConfiguracionForm';
 import Inscripciones from './components/Inscripciones';
+import Usuarios from './components/Usuarios';
+import UsuariosForm from './components/UsuariosForm';
 
 function App() {
   return (
@@ -23,9 +25,10 @@ function App() {
         <Route path="/configuraciones/agregar" element={<PrivateRoute><ConfiguracionForm /></PrivateRoute>} />
         <Route path="/configuraciones/editar/:id" element={<PrivateRoute><ConfiguracionForm /></PrivateRoute>} />
         <Route path="/configuraciones" element={<PrivateRoute><Configuraciones /></PrivateRoute>} />
-        <Route path="/inscripciones" element={<PrivateRoute><Inscripciones /></PrivateRoute>} />        
-        <Route path="/inscripciones" element={<PrivateRoute><Inscripciones /></PrivateRoute>} />
-
+        <Route path="/inscripciones" element={<PrivateRoute><Inscripciones /></PrivateRoute>} /> 
+        <Route path="/usuarios" element={<PrivateRoute><Usuarios /></PrivateRoute>} />
+        <Route path="/usuarios/agregar" element={<PrivateRoute><UsuariosForm /></PrivateRoute>} />
+        <Route path="/usuarios/editar/:id" element={<PrivateRoute><UsuariosForm /></PrivateRoute>} />
         {/* 404 -> login */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
