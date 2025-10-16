@@ -10,7 +10,7 @@ const UsuariosForm = () => {
     usuario: '',
     tipousuario: '',
     correo: '',
-    telefono: '',
+    //telefono: '',
     contrasena: '',
   });
   const [loading, setLoading] = useState(false);
