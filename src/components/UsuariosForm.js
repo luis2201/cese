@@ -10,7 +10,7 @@ const UsuariosForm = () => {
     usuario: '',
     tipousuario: '',
     correo: '',
-    //telefono: '',
+    telefono: '',
     contrasena: '',
   });
   const [loading, setLoading] = useState(false);
@@ -84,10 +84,10 @@ const UsuariosForm = () => {
             <input className="input" name="correo" value={form.correo} onChange={handleChange} />
           </div>
 
-          {/* <div>
+          <div>
             <label className="label">TelÃ©fono</label>
             <input className="input" name="telefono" value={form.telefono} onChange={handleChange} />
-          </div> */}
+          </div>
 
           <div>
             <label className="label">Rol</label>
