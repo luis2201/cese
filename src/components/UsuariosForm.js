@@ -84,10 +84,10 @@ const UsuariosForm = () => {
             <input className="input" name="correo" value={form.correo} onChange={handleChange} />
           </div>
 
-          <div>
+          {/* <div>
             <label className="label">TelÃ©fono</label>
             <input className="input" name="telefono" value={form.telefono} onChange={handleChange} />
-          </div>
+          </div> */}
 
           <div>
             <label className="label">Rol</label>
@@ -101,7 +101,7 @@ const UsuariosForm = () => {
 
           {!modoEdicion && (
             <div>
-              <label className="label">ContraseÃ±a</label>
+              <label className="label">Contraseña</label>
               <input className="input" name="contrasena" value={form.contrasena} onChange={handleChange} type="password" required />
             </div>
           )}
