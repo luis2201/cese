@@ -4,7 +4,7 @@ import { getData, postData, putData } from '../services/apiService';
 import Swal from 'sweetalert2';
 import Layout from './Layout';
 
-const UsuarioForm = () => {
+const UsuariosForm = () => {
   const [form, setForm] = useState({
     nombres: '',
     usuario: '',
@@ -129,4 +129,4 @@ const UsuarioForm = () => {
   );
 };
 
-export default UsuarioForm;
+export default UsuariosForm;
