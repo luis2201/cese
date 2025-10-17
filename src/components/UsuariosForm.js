@@ -94,7 +94,6 @@ const UsuariosForm = () => {
             <select className="input" name="tipousuario" value={form.tipousuario} onChange={handleChange} required>
               <option value="">-- Selecciona --</option>
               <option value="ADMINCESE">ADMINCESE</option>
-              <option value="DOCENTE">DOCENTE</option>
               <option value="USUARIOCESE">USUARIOCESE</option>
             </select>
           </div>
